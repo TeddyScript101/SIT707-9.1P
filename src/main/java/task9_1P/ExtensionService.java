@@ -6,28 +6,43 @@ import java.time.format.DateTimeParseException;
 public class ExtensionService {
 
     public boolean submitRequest(String reason, String dateStr) {
-
-        if (reason == null || reason.trim().isEmpty() || dateStr == null) {
+        if (!isValidInput(reason, dateStr)) {
             return false;
         }
 
+        LocalDate requestDate = parseDate(dateStr);
+        if (requestDate == null) {
+            return false;
+        }
+
+        if (isPastDate(requestDate)) {
+            log("Validation Failed: Date is in the past.");
+            return false;
+        }
+
+        log("Extension submitted successfully for: " + dateStr);
+        return true;
+    }
+
+    private boolean isValidInput(String reason, String dateStr) {
+        return reason != null && !reason.trim().isEmpty()
+                && dateStr != null && !dateStr.trim().isEmpty();
+    }
+
+    private LocalDate parseDate(String dateStr) {
         try {
-
-            LocalDate requestDate = LocalDate.parse(dateStr);
-            LocalDate today = LocalDate.now();
-
-
-            if (requestDate.isBefore(today)) {
-                System.out.println("Validation Failed: Date is in the past.");
-                return false;
-            }
-
-     
-            System.out.println("Extension submitted successfully for: " + dateStr);
-            return true;
-
+            return LocalDate.parse(dateStr);
         } catch (DateTimeParseException e) {
-            return false;
+            log("Validation Failed: Invalid date format.");
+            return null;
         }
+    }
+
+    private boolean isPastDate(LocalDate date) {
+        return date.isBefore(LocalDate.now());
+    }
+
+    private void log(String message) {
+        System.out.println(message);
     }
 }
